@@ -41,9 +41,22 @@ const streamingComponents = buildComponents(true);
 
 export const AIMessageMarkdown = memo(function AIMessageMarkdown({ children, isStreaming = false, streamingAnimation = "word", className = "", components }: AIMessageMarkdownProps) {
     if (!children.trim()) return null;
+    const messageClassName = `ai-message-markdown ${isStreaming ? "ai-message-markdown-streaming" : ""} ${className}`.trim();
+
+    // HTML 文档按源码显示，避免 Markdown 解析时丢失标签。
+    if (/^\s*(?:<!doctype\s+html|<html)(?=[\s>]|$)/i.test(children)) {
+        return (
+            <div className={messageClassName} dir="ltr">
+                <AiMessageCodeBlock isStreaming={isStreaming}>
+                    <code className="ai-message-markdown-code language-html">{children}</code>
+                </AiMessageCodeBlock>
+            </div>
+        );
+    }
+
     return (
         <Streamdown
-            className={`ai-message-markdown ${isStreaming ? "ai-message-markdown-streaming" : ""} ${className}`.trim()}
+            className={messageClassName}
             mode="streaming"
             dir="auto"
             isAnimating={isStreaming}
